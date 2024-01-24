@@ -50,18 +50,20 @@ final = final[f1]
 dead = pd.read_csv("deadlines.csv")
 
 # Set up common x axis
-dt1 = alt.DateTime(year=2017, month=12)
-dt2 = alt.DateTime(year=2019, month=12)
+dt1 = alt.DateTime(year=2024, month=1)
+dt2 = alt.DateTime(year=2024, month=5)
 x_scale = alt.Scale(domain=(dt1, dt2))
 
 tt = [
-    alt.Tooltip("num_fte", format=".2f"),
-    alt.Tooltip("person")
+    alt.Tooltip("Assignment")
 ]
 
 # dtt = alt.Tooltip("dead_desc")
-# dtt2 = alt.Tooltip("person")
+# dtt2 = alt.Tooltip("Type")
 no_axis_title = axis = alt.Axis(title="")
+
+for v in range(len(gd["task"])):
+    gd["task"][v] = gd["task"][v][1:]
 
 alt_dead = alt.Chart(dead).mark_text(align="center", baseline="middle", size=20).encode(
     y=alt.Y('task_o:N'),
@@ -79,8 +81,8 @@ alt_gantt_1 = alt.\
         x=alt.X('start', scale=x_scale, axis=no_axis_title),
         x2='end',
         y=alt.Y('task', scale=y_scale, axis=no_axis_title),
-        color=alt.Color('person', legend=alt.Legend(orient="right")),
-        opacity=alt.Opacity('num_fte', legend=None),
+        color=alt.Color('Category', legend=alt.Legend(orient="right")),
+        # opacity=alt.Opacity('num_fte', legend=None),
         tooltip=tt
     )\
     .properties(width=CHART_WIDTH)
@@ -95,36 +97,36 @@ alt_gantt_2.encoding.tooltip = tt
 
 alt_gantt_layered = alt_gantt_1 + alt_gantt_2 + alt_dead
 
-alt_util = alt.Chart(final).mark_area(interpolate="monotone").encode(
-    x=alt.X('date', scale=x_scale, axis=no_axis_title),
-    y=alt.Y('sum(num_fte)',
-            axis=alt.Axis(title="Sum of FTE required")),
-    color='person'
-).properties(width=CHART_WIDTH, height=100)
+# alt_util = alt.Chart(final).mark_area(interpolate="monotone").encode(
+#     x=alt.X('date', scale=x_scale, axis=no_axis_title),
+#     y=alt.Y('sum(num_fte)',
+#             axis=alt.Axis(title="Sum of FTE required")),
+#     color='Type'
+# ).properties(width=CHART_WIDTH, height=100)
 
-alt_cat = alt_util.mark_line().encode(
-    y=alt.Y('sum(num_fte)', axis=alt.Axis(title="FTE required")),
-    color='category'
-)
+# alt_cat = alt_util.mark_line().encode(
+#     y=alt.Y('sum(num_fte)', axis=alt.Axis(title="FTE required")),
+#     color='Category'
+# )
 
-import numpy as np
-gd['priority'] = gd['priority'] + np.random.uniform(-1, 1, len(gd))
-gd['weeks_work'] = gd['weeks_work'] + np.random.uniform(-1, 1, len(gd))
+# import numpy as np
+# gd['priority'] = gd['priority'] + np.random.uniform(-1, 1, len(gd))
+# gd['weeks_work'] = gd['weeks_work'] + np.random.uniform(-1, 1, len(gd))
 
-alt_work = alt.Chart(gd).mark_point().encode(
-    x=alt.X('weeks_work', axis=alt.Axis(title="Weeks of work for task")),
-    y=alt.X('priority', axis=alt.Axis(title="Task value/priority")),
-    tooltip='desc',
-    color=alt.Color('person', legend=None)
-).properties(width=CHART_WIDTH, height=500)
+# alt_work = alt.Chart(gd).mark_point().encode(
+#     x=alt.X('weeks_work', axis=alt.Axis(title="Weeks of work for task")),
+#     y=alt.X('priority', axis=alt.Axis(title="Task value/priority")),
+#     tooltip='desc',
+#     color=alt.Color('Type', legend=None)
+# ).properties(width=CHART_WIDTH, height=500)
 
-alt_work_text = alt_work.mark_text(align="left", baseline="middle", size=10, dx=5, dy=-5).encode(
-    text='task'
-)
+# alt_work_text = alt_work.mark_text(align="left", baseline="middle", size=10, dx=5, dy=-5).encode(
+#     text='task'
+# )
 
-alt_work_layered = alt_work + alt_work_text
+# alt_work_layered = alt_work + alt_work_text
 
-vconcat = (alt_gantt_layered & alt_util & alt_cat).resolve_scale("independent")
+# vconcat = (alt_gantt_layered & alt_util & alt_cat).resolve_scale("independent")
 
-final_chart = alt.hconcat(vconcat, alt_work_layered)
-final_chart.savechart("index.html")
+# final_chart = alt.hconcat(vconcat, alt_work_layered)
+alt_gantt_layered.save("index.html")
