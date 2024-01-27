@@ -1,7 +1,7 @@
 import pandas as pd
 import altair as alt
 
-CHART_WIDTH = 700
+CHART_WIDTH = 1000
 downsample_skip_days = 7
 
 def resample_and_add_zeros(df):
@@ -65,7 +65,7 @@ no_axis_title = axis = alt.Axis(title="")
 for v in range(len(gd["task"])):
     gd["task"][v] = gd["task"][v][1:]
 
-alt_dead = alt.Chart(dead).mark_text(align="center", baseline="middle", size=20).encode(
+alt_dead = alt.Chart(dead).mark_text(align="center", baseline="middle", size=30).encode(
     y=alt.Y('task_o:N'),
     x=alt.X('start:T', scale=x_scale),
     text=alt.Text('mark'),
@@ -85,9 +85,9 @@ alt_gantt_1 = alt.\
         # opacity=alt.Opacity('num_fte', legend=None),
         tooltip=tt
     )\
-    .properties(width=CHART_WIDTH)
+    .properties(width=CHART_WIDTH, height=500)
 
-alt_gantt_2 = alt_gantt_1.mark_text(dx=4, dy=0, align='left', baseline='middle')\
+alt_gantt_2 = alt_gantt_1.mark_text(dx=4, dy=0, align='left', baseline='middle', fontSize=15)\
     .encode(
     text='desc'
 )
@@ -96,6 +96,13 @@ alt_gantt_2.encoding.opacity = alt.Undefined
 alt_gantt_2.encoding.tooltip = tt
 
 alt_gantt_layered = alt_gantt_1 + alt_gantt_2 + alt_dead
+alt_gantt_layered = alt_gantt_layered.configure_axis(
+        labelFontSize=14,
+        titleFontSize=14,
+    ).configure_legend(
+        titleFontSize=16,
+        labelFontSize=14
+    )
 
 # alt_util = alt.Chart(final).mark_area(interpolate="monotone").encode(
 #     x=alt.X('date', scale=x_scale, axis=no_axis_title),
