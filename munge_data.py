@@ -1,7 +1,7 @@
 import pandas as pd
 import altair as alt
 
-CHART_WIDTH = 700
+CHART_WIDTH = 850
 downsample_skip_days = 7
 
 def resample_and_add_zeros(df):
