@@ -2,6 +2,7 @@ import pandas as pd
 import altair as alt
 
 CHART_WIDTH = 850
+CHART_HEIGHT = 400
 downsample_skip_days = 7
 
 def resample_and_add_zeros(df):
@@ -50,7 +51,7 @@ final = final[f1]
 dead = pd.read_csv("deadlines.csv")
 
 # Set up common x axis
-dt1 = alt.DateTime(year=2024, month=1)
+dt1 = alt.DateTime(year=2024, month=1, date=14)
 dt2 = alt.DateTime(year=2024, month=5)
 x_scale = alt.Scale(domain=(dt1, dt2))
 
@@ -67,9 +68,29 @@ for v in range(len(gd["task"])):
 
 alt_dead = alt.Chart(dead).mark_text(align="center", baseline="middle", size=32).encode(
     y=alt.Y('task_o:N'),
-    x=alt.X('start:T', scale=x_scale),
+    x=alt.X('start:T', scale=x_scale, axis=alt.Axis(format="%a %-m/%-d", values=[
+        alt.DateTime(year=2024, month=1, date=19), alt.DateTime(year=2024, month=1, date=26), alt.DateTime(year=2024, month=2, date=2),
+        alt.DateTime(year=2024, month=2, date=9), alt.DateTime(year=2024, month=2, date=16),
+        alt.DateTime(year=2024, month=2, date=23), alt.DateTime(year=2024, month=3, date=1),
+        alt.DateTime(year=2024, month=3, date=8), alt.DateTime(year=2024, month=3, date=15),
+        alt.DateTime(year=2024, month=3, date=22), alt.DateTime(year=2024, month=3, date=29),
+        alt.DateTime(year=2024, month=4, date=5), alt.DateTime(year=2024, month=4, date=12),
+        alt.DateTime(year=2024, month=4, date=19), alt.DateTime(year=2024, month=4, date=26),
+    ])),
     text=alt.Text('mark'),
     tooltip="dead_desc"
+)
+
+cutoff = pd.read_csv("shading.csv", parse_dates=["start", "end"])
+
+areas = alt.Chart(cutoff.reset_index()).mark_rect(
+    opacity=0.05
+).encode(
+    x=alt.X('start', scale=x_scale, axis=no_axis_title),
+    x2='end',
+    y=alt.value(0),  # pixels from top
+    y2=alt.value(CHART_HEIGHT),  # pixels from top
+    # color='gray'
 )
 
 y_scale = alt.Scale(padding=0.3)
@@ -85,7 +106,7 @@ alt_gantt_1 = alt.\
         # opacity=alt.Opacity('num_fte', legend=None),
         tooltip=tt
     )\
-    .properties(width=CHART_WIDTH, height=400)
+    .properties(width=CHART_WIDTH, height=CHART_HEIGHT)
 
 alt_gantt_2 = alt_gantt_1.mark_text(dx=4, dy=0, align='left', baseline='middle', fontSize=14)\
     .encode(
@@ -95,7 +116,7 @@ alt_gantt_2.encoding.color = alt.Undefined
 alt_gantt_2.encoding.opacity = alt.Undefined
 alt_gantt_2.encoding.tooltip = tt
 
-alt_gantt_layered = alt_gantt_1 + alt_gantt_2 + alt_dead
+alt_gantt_layered = areas + alt_gantt_1 + alt_gantt_2 + alt_dead
 alt_gantt_layered = alt_gantt_layered.configure_axis(
         labelFontSize=11.5,
         titleFontSize=11.5,
