@@ -20,7 +20,7 @@ gd = pd.read_csv("gantt.csv", parse_dates=["start", "end"])
 gd["end"] = gd["end"] - pd.DateOffset(1)
 gd["num_fte"] = gd["weeks_work"]*7/(gd["end"] - gd["start"]).dt.days
 gd['task_id'] = range(1, len(gd)+1)
-gd["task"] = gd['task_id'].map('{:02}'.format) + " " + gd["task"]
+# gd["task"] = gd['task_id'].map('{:02}'.format) + " " + gd["task"]
 starts = gd[['start', 'task_id']].rename(columns={'start': 'date'})
 ends = gd[['end', 'task_id']].rename(columns={'end': 'date'})
 start_end = pd.concat([starts, ends]).set_index('date')
@@ -41,8 +41,7 @@ merge_gd = gd.copy()
 del merge_gd["weeks_work"]
 del merge_gd["num_fte"]
 
-final = fact_table.merge(merge_gd, right_on='task_id',
-                         left_on='task_id', how='left')
+final = fact_table.merge(merge_gd, right_on='task_id', left_on='task_id', how='left')
 
 # Downsample
 f1 = final["date"].dt.day % downsample_skip_days == 0
@@ -63,8 +62,8 @@ tt = [
 # dtt2 = alt.Tooltip("Type")
 no_axis_title = axis = alt.Axis(title="")
 
-for v in range(len(gd["task"])):
-    gd["task"][v] = gd["task"][v][1:]
+# for v in range(len(gd["task"])):
+#     gd["task"][v] = gd["task"][v][1:]
 
 alt_dead = alt.Chart(dead).mark_text(align="center", baseline="middle", size=32).encode(
     y=alt.Y('task_o:N'),
@@ -95,13 +94,15 @@ areas = alt.Chart(cutoff.reset_index()).mark_rect(
 
 y_scale = alt.Scale(padding=0.3)
 
+cat_names = ['Pitch Assignment', 'Project Proposal', 'Project Design', 'Peer Review', 'Milestone 1', 'Milestone 2', 'Final']
+# print(list(gd['task']))
 alt_gantt_1 = alt.\
     Chart(gd).\
     mark_bar().\
     encode(
         x=alt.X('start', scale=x_scale, axis=no_axis_title),
         x2='end',
-        y=alt.Y('task', scale=y_scale, axis=no_axis_title),
+        y=alt.Y('task', scale=y_scale, axis=no_axis_title, sort=cat_names),
         color=alt.Color('Category', legend=alt.Legend(orient="right")),
         # opacity=alt.Opacity('num_fte', legend=None),
         tooltip=tt
